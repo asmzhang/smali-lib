@@ -43,9 +43,9 @@ idea {
 }
 
 dependencies {
-    implementation project(':util')
-    api project(':dexlib2')
-    implementation project(':baksmali')
+    implementation project(':smali-lib:util')
+    api project(':smali-lib:dexlib2')
+    implementation project(':smali-lib:baksmali')
     implementation depends.antlr_runtime
     implementation depends.jcommander
     implementation depends.stringtemplate
@@ -55,15 +55,18 @@ dependencies {
     antlr depends.antlr
 }
 
-processResources.inputs.property('version', version)
-processResources.expand('version': version)
+processResources {
+    dependsOn generateGrammarSource
+    inputs.property('version', version)
+    expand('version': version)
+}
 
 // Build a separate jar that contains all dependencies
-task fatJar(type: Jar, dependsOn: jar) {
+task fatJar(type: Jar, dependsOn: [jar, ':smali-lib:util:jar', ':smali-lib:dexlib2:jar', ':smali-lib:baksmali:jar']) {
     from sourceSets.main.output
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
-    classifier = 'fat'
+    archiveClassifier.set('fat')
 
     manifest {
         attributes('Main-Class': 'org.jf.smali.Main')
@@ -71,7 +74,7 @@ task fatJar(type: Jar, dependsOn: jar) {
 
     doLast {
         if (!System.getProperty('os.name').toLowerCase().contains('windows')) {
-            ant.symlink(link: file("${destinationDirectory.get()}/smali.jar"), resource: archivePath, overwrite: true)
+            ant.symlink(link: file("${destinationDirectory.get()}/smali.jar"), resource: archiveFile.get().getAsFile(), overwrite: true)
         }
     }
 }

@@ -46,19 +46,9 @@ subprojects {
         ]
     }
 
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
+    // Repositories are configured in the root settings.gradle file
 
 }
 
-buildscript {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-    }
-    dependencies {
-    }
-}
+// buildscript block removed - repositories are configured in root settings.gradle
 

@@ -8,12 +8,12 @@ buildscript {
 }
 
 dependencies {
-    implementation project(':util')
-    api project(':dexlib2')
+    implementation project(':smali-lib:util')
+    api project(':smali-lib:dexlib2')
     implementation depends.jcommander
 
     testImplementation depends.junit
-    testImplementation project(':smali')
+    testImplementation project(':smali-lib:smali')
     testImplementation depends.antlr_runtime
 }
 
@@ -21,11 +21,11 @@ processResources.inputs.property('version', version)
 processResources.expand('version': version)
 
 // Build a separate jar that contains all dependencies
-task fatJar(type: Jar) {
+task fatJar(type: Jar, dependsOn: [':smali-lib:util:jar', ':smali-lib:dexlib2:jar']) {
     from sourceSets.main.output
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 
-    classifier = 'fat'
+    archiveClassifier.set('fat')
 
     manifest {
         attributes('Main-Class': 'org.jf.baksmali.Main')
@@ -33,7 +33,7 @@ task fatJar(type: Jar) {
 
     doLast {
         if (!System.getProperty('os.name').toLowerCase().contains('windows')) {
-            ant.symlink(link: file("${destinationDirectory.get()}/baksmali.jar"), resource: archivePath, overwrite: true)
+            ant.symlink(link: file("${destinationDirectory.get()}/baksmali.jar"), resource: archiveFile.get().getAsFile(), overwrite: true)
         }
     }
 }

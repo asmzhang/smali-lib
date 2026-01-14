@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':dexlib2')
+    implementation project(':smali-lib:dexlib2')
     implementation depends.jcommander
     testImplementation depends.junit
 }
